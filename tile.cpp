@@ -1503,7 +1503,13 @@ long long write_tile(decompressor *geoms, std::atomic<long long> *geompos_in, ch
 		fprintf(stderr, "Internal error: %d shards, max zoom increment %d\n", child_shards, max_zoom_increment);
 		exit(EXIT_IMPOSSIBLE);
 	}
-	if ((((child_shards - 1) << 1) & child_shards) != child_shards) {
+
+	// if ((((child_shards - 1) << 1) & child_shards) != child_shards) {
+	// 	fprintf(stderr, "Internal error: %d shards not a power of 2\n", child_shards);
+	// 	exit(EXIT_IMPOSSIBLE);
+	// }
+
+    if ((child_shards & (child_shards - 1)) != 0) {
 		fprintf(stderr, "Internal error: %d shards not a power of 2\n", child_shards);
 		exit(EXIT_IMPOSSIBLE);
 	}
