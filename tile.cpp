@@ -1488,6 +1488,18 @@ bool drop_feature_unless_it_can_be_added_to_a_multiplier_cluster(layer_features 
 	return false;  // did not drop because nothing could be found to accumulate attributes onto
 }
 
+unsigned long long nextPowerOf2(unsigned long long n) {
+    n--;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    n |= n >> 32; 
+    n++;
+    return n;
+}
+
 long long write_tile(decompressor *geoms, std::atomic<long long> *geompos_in, char *global_stringpool, int z, const unsigned tx, const unsigned ty, const int detail, int min_detail, sqlite3 *outdb, const char *outdir, int buffer, const char *fname, compressor **geomfile, int minzoom, int maxzoom, double todo, std::atomic<long long> *along, long long alongminus, double gamma, int child_shards, long long *pool_off, unsigned *initial_x, unsigned *initial_y, std::atomic<int> *running, double simplification, std::vector<std::map<std::string, layermap_entry>> *layermaps, std::vector<std::vector<std::string>> *layer_unmaps, size_t tiling_seg, size_t pass, unsigned long long mingap, long long minextent, unsigned long long mindrop_sequence, const char *prefilter, const char *postfilter, json_object *filter, write_tile_args *arg, atomic_strategy *strategy, bool compressed_input, node *shared_nodes_map, size_t nodepos, std::vector<std::string> const &unidecode_data) {
 	double merge_fraction = 1;
 	double mingap_fraction = 1;
@@ -1504,15 +1516,14 @@ long long write_tile(decompressor *geoms, std::atomic<long long> *geompos_in, ch
 		exit(EXIT_IMPOSSIBLE);
 	}
 
-	// if ((((child_shards - 1) << 1) & child_shards) != child_shards) {
-	// 	fprintf(stderr, "Internal error: %d shards not a power of 2\n", child_shards);
-	// 	exit(EXIT_IMPOSSIBLE);
-	// }
-
     if ((child_shards & (child_shards - 1)) != 0) {
-		fprintf(stderr, "Internal error: %d shards not a power of 2\n", child_shards);
-		// exit(EXIT_IMPOSSIBLE);
-	}
+        std::cout << "TESTING\n";
+        std::cout << child_shards << std::endl;
+        std::cerr << "Internal error: " << child_shards << " shards not a power of 2. Adjusting...\n";
+
+        child_shards = nextPowerOf2(child_shards);
+        std::cout << "Adjusted child_shards to the next power of 2: " << child_shards << std::endl;
+    }
 
 	int nextzoom = z + 1;
 	if (nextzoom < minzoom) {
